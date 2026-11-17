@@ -1,3 +1,4 @@
+import SafetyMenu from "../components/SafetyMenu";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../services/api";
@@ -94,13 +95,13 @@ export default function Home() {
       <header className="sticky top-0 z-20 border-b border-line/70 bg-paper/80 backdrop-blur-xl">
         <div className="mx-auto flex max-w-md items-center justify-between px-5 py-4">
           <p className="font-display text-2xl font-semibold tracking-tight text-ink">Echo</p>
-          <button
-            onClick={logout}
-            title="Log out"
+                    <Link
+            to="/profile"
+            title="My profile"
             className="flex h-10 w-10 items-center justify-center rounded-full bg-ink font-display text-base text-paper shadow-md transition hover:scale-105"
           >
             {initialOf(user.name)}
-          </button>
+          </Link>
         </div>
       </header>
 
@@ -160,9 +161,12 @@ export default function Home() {
                   </div>
 
                   <div className="p-6">
-                    <div className="flex items-baseline justify-between gap-3">
-                      <h2 className="font-display text-3xl tracking-tight text-ink">{u.name}</h2>
-                      <span className="text-lg text-muted">{u.age}</span>
+                      <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-baseline gap-3">
+                        <h2 className="font-display text-3xl tracking-tight text-ink">{u.name}</h2>
+                        <span className="text-lg text-muted">{u.age}</span>
+                      </div>
+                      <SafetyMenu userId={u.id} userName={u.name} onChange={loadAll} />
                     </div>
                     {u.bio && <p className="mt-2 leading-relaxed text-muted">{u.bio}</p>}
 

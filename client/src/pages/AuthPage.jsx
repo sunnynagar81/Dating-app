@@ -52,7 +52,7 @@ export default function AuthPage() {
       } else {
         await register({ ...form, age: Number(form.age) });
       }
-      navigate("/");
+      navigate("/home");
     } catch (err) {
       setError(err.response?.data?.message || err.message);
     } finally {

@@ -1,17 +1,20 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import api from "../services/api";
 import { createSocket } from "../services/socket";
 import { useAuth } from "../context/AuthContext";
 import VoiceRecorder from "../components/VoiceRecorder";
 import VoicePlayer from "../components/VoicePlayer";
+import SafetyMenu from "../components/SafetyMenu";
 
 const UNLOCK_TARGET = 5;
 
 export default function Chat() {
   const { matchId } = useParams();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [messages, setMessages] = useState([]);
+  const [partnerId, setPartnerId] = useState(null);
   const [partnerName, setPartnerName] = useState("");
   const [photoUnlocked, setPhotoUnlocked] = useState(false);
   const [sending, setSending] = useState(false);
@@ -35,6 +38,7 @@ export default function Chat() {
 
         const current = matchRes.data.matches.find((m) => m.matchId === matchId);
         if (current) {
+          setPartnerId(current.id);
           setPartnerName(current.name);
           setPhotoUnlocked(current.photoUnlocked);
         }
@@ -85,7 +89,7 @@ export default function Chat() {
       <header className="sticky top-0 z-20 border-b border-line/70 bg-paper/80 backdrop-blur-xl">
         <div className="mx-auto flex max-w-2xl items-center gap-3 px-4 py-3">
           <Link
-            to="/"
+            to="/home"
             aria-label="Back"
             className="flex h-10 w-10 items-center justify-center rounded-full text-xl text-ink transition hover:bg-line"
           >
@@ -98,6 +102,14 @@ export default function Chat() {
             <p className="font-display text-lg leading-tight text-ink">{partnerName || "Chat"}</p>
             <p className="text-xs text-muted">{photoUnlocked ? "Photo unlocked" : "Photo locked"}</p>
           </div>
+          {partnerId && (
+            <SafetyMenu
+              userId={partnerId}
+              userName={partnerName}
+              matchId={matchId}
+              onChange={() => navigate("/home")}
+            />
+          )}
         </div>
       </header>
 
@@ -106,7 +118,7 @@ export default function Chat() {
           <div className="flex items-center justify-between rounded-2xl border border-line bg-white px-5 py-4 shadow-sm">
             <div>
               <p className="text-sm font-semibold text-ink">Unlock their photo</p>
-              <p className="text-xs text-muted">Send 5 voice messages, or talk for 3 minutes</p>
+              <p className="text-xs text-muted">Send 5 voice messages to unlock</p>
             </div>
             <div className="flex items-center gap-2">
               {Array.from({ length: UNLOCK_TARGET }).map((_, i) => (

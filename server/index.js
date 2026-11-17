@@ -9,6 +9,7 @@ const authRoutes = require("./routes/authRoutes");
 const voiceRoutes = require("./routes/voiceRoutes");
 const matchRoutes = require("./routes/matchRoutes");
 const photoRoutes = require("./routes/photoRoutes");
+const safetyRoutes = require("./routes/safetyRoutes");
 
 const app = express();
 const server = http.createServer(app);
@@ -27,6 +28,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/voice", voiceRoutes);
 app.use("/api/match", matchRoutes);
 app.use("/api/photo", photoRoutes);
+app.use("/api/safety", safetyRoutes);
 
 initSocket(server);
 

@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const VoiceIntro = require("../models/VoiceIntro");
 const Match = require("../models/Match");
+const { getBlockedUserIds } = require("../utils/blockUtils");
 
 // Ek user ka public data, photo tabhi jab unlock ho
 const publicProfile = (user, match) => ({
@@ -14,10 +15,15 @@ const publicProfile = (user, match) => ({
     match && match.photoUnlocked && user.photoUrl ? `/api/photo/${user._id}` : null,
 });
 
-// GET /api/match/discover  (voice intro wale doosre users)
+// GET /api/match/discover
 const discover = async (req, res) => {
   try {
-    const intros = await VoiceIntro.find({ userId: { $ne: req.user._id } }).limit(20);
+    const blockedIds = await getBlockedUserIds(req.user._id);
+
+    const intros = await VoiceIntro.find({
+      userId: { $nin: [req.user._id, ...blockedIds] },
+    }).limit(20);
+
     const userIds = intros.map((i) => i.userId);
     const users = await User.find({ _id: { $in: userIds } });
 
@@ -38,6 +44,11 @@ const connect = async (req, res) => {
     const otherId = req.params.userId;
     if (otherId === req.user._id.toString()) {
       return res.status(400).json({ message: "You cannot connect with yourself" });
+    }
+
+    const blockedIds = await getBlockedUserIds(req.user._id);
+    if (blockedIds.includes(otherId)) {
+      return res.status(404).json({ message: "User not found" });
     }
 
     let match = await Match.findOne({
@@ -78,7 +89,6 @@ const getMyMatches = async (req, res) => {
   }
 };
 
-
 // POST /api/match/:id/call  (body mein { "duration": 200 })
 const addCallDuration = async (req, res) => {
   try {
@@ -87,7 +97,7 @@ const addCallDuration = async (req, res) => {
 
     const duration = Number(req.body.duration);
     if (!duration || duration <= 0) {
-      return res.status(400).json({ message: "Valid duration is required" });
+      return res.status(400).json({ message: "Send a valid duration" });
     }
 
     match.callDurationSeconds = Math.max(match.callDurationSeconds, duration);

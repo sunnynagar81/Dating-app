@@ -18,6 +18,11 @@ export const AuthProvider = ({ children }) => {
     setUser(data.user);
   };
 
+  const updateUser = (newUser) => {
+    localStorage.setItem("user", JSON.stringify(newUser));
+    setUser(newUser);
+  };
+
   const login = async (phone, password) => {
     const { data } = await api.post("/auth/login", { phone, password });
     saveSession(data);
@@ -35,7 +40,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout }}>
+    <AuthContext.Provider value={{ user, login, register, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );
